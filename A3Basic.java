@@ -12,6 +12,7 @@ public class A3Basic extends JPanel {
         JPanel playView = new PlayView(model);
         JPanel editView = new EditView(model);
         editView.setPreferredSize(new Dimension(700, 200));
+        editView.setBackground(Color.lightGray);
 
         // layout the views
         setLayout(new BorderLayout());
@@ -37,7 +38,7 @@ public class A3Basic extends JPanel {
         // create the window
         JFrame f = new JFrame("A3Basic"); // jframe is the app window
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        f.setSize(700, 600); // window size
+        f.setSize(716, 600); // window size
         f.setContentPane(new A3Basic()); // add main panel to jframe
         f.setVisible(true); // show the window
     }
