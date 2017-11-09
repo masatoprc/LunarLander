@@ -8,6 +8,8 @@ import java.util.Observable;
 
 class Ship extends Observable {
 
+	boolean isCrashed = false;
+	boolean isLanded = false;
     // FPS and initial position for ship to appear
     public Ship(int fps, int x, int y) {
 
@@ -44,7 +46,9 @@ class Ship extends Observable {
         this.position = (Point2d)position.clone();
         velocity  = new Vector2d(0, 0);
         fuel = 50;
+        isCrashed = false;
         setPaused(true);
+        isLanded = false;
         setChangedAndNotify();
     }
 

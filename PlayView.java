@@ -17,6 +17,15 @@ public class PlayView extends JPanel implements Observer {
     	super.paintComponent(g);
     	Graphics2D g2 = (Graphics2D) g;  
     	AffineTransform M = g2.getTransform();
+    	AffineTransform TBg = (AffineTransform) M.clone();
+		TBg.concatenate(AffineTransform.getTranslateInstance(
+				this.getWidth()/2 + scale * (model.bg.getCenterX() - model.ship.getPosition().getX() - 5), 
+				this.getHeight()/2 + scale * (model.bg.getCenterY() - model.ship.getPosition().getY() - 5)));
+    	TBg.concatenate(AffineTransform.getScaleInstance(3, 3));
+    	TBg.concatenate(AffineTransform.getTranslateInstance(-model.bg.getCenterX(), -model.bg.getCenterY()));
+    	g2.setTransform(TBg);
+    	g2.setColor(Color.lightGray);
+		g2.fill(model.bg);
     	AffineTransform TTer = (AffineTransform) M.clone();
 		TTer.concatenate(AffineTransform.getTranslateInstance(
 				this.getWidth()/2 + scale * (model.terrain.getBounds().getCenterX() - model.ship.getPosition().getX() - 5), 
@@ -33,6 +42,14 @@ public class PlayView extends JPanel implements Observer {
     	TPad.concatenate(AffineTransform.getScaleInstance(3, 3));
     	TPad.concatenate(AffineTransform.getTranslateInstance(-model.pad.getCenterX(), -model.pad.getCenterY()));
     	g2.setTransform(TPad);
+        if (model.ship.isLanded && model.isEnhanced) {
+            g2.setColor(Color.blue); 
+            g2.fillRect((int) model.pad.getX(), (int) model.pad.getY() - 10, 3, 9);
+            g2.setColor(Color.white); 
+            g2.fillRect((int) model.pad.getX() + 3, (int) model.pad.getY() - 10, 3, 9);
+            g2.setColor(Color.red); 
+            g2.fillRect((int) model.pad.getX() + 6, (int) model.pad.getY() - 10, 3, 9);
+        }
 		g2.setColor(Color.RED);
 		g2.fill(model.pad);
 		AffineTransform TShip = (AffineTransform) M.clone();
@@ -43,7 +60,7 @@ public class PlayView extends JPanel implements Observer {
 		g2.setColor(Color.blue);
 		g2.fill(ship);
     	// reset the transform to what it was before we drew the shape
-        g2.setTransform(M);     	
+        g2.setTransform(M);     
 	}
 
 	public PlayView(GameModel model) {
@@ -53,7 +70,27 @@ public class PlayView extends JPanel implements Observer {
         model.addObserver(this);
         this.model = model;
         // want the background to be black
-        setBackground(Color.lightGray);
+        setBackground(Color.black);
+        this.addKeyListener(new KeyAdapter() {
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+				int keyCode = e.getKeyCode();
+				if (keyCode == KeyEvent.VK_W) {
+					model.ship.thrustUp();
+				} else if (keyCode == KeyEvent.VK_A) {
+					model.ship.thrustLeft();
+				} else if (keyCode == KeyEvent.VK_S) {
+					model.ship.thrustDown();
+				} else if (keyCode == KeyEvent.VK_D) {
+					model.ship.thrustRight();
+				} else if (keyCode == KeyEvent.VK_SPACE) {
+					if (model.ship.isCrashed || model.ship.isLanded) {model.ship.reset(model.ship.startPosition);}
+					model.ship.setPaused(!model.ship.isPaused());
+				}
+			}
+        	
+		});
     }
 
     @Override

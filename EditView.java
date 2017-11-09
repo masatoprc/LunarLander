@@ -24,6 +24,7 @@ public class EditView extends JPanel implements Observer {
         			model.oldPadXValue = model.pad.getX();
 					model.oldPadYValue = model.pad.getY();
         			model.updatePad(e.getX(), e.getY(), true);
+        			model.ship.reset(model.ship.startPosition);
         			repaint();
         		}
         	}
@@ -53,11 +54,13 @@ public class EditView extends JPanel implements Observer {
 					model.updatePad(e.getX(), e.getY(), true);
 					repaint();
 					curPadSel = false;
+					model.ship.reset(model.ship.startPosition);
 					return;
 				}
 				if (model.curCircleSel != -1) {
 					model.terrain.ypoints[model.curCircleSel] = e.getY();
-					model.updatePeak(model.curCircleSel, e.getY(), true);			
+					model.updatePeak(model.curCircleSel, e.getY(), true);	
+					model.ship.reset(model.ship.startPosition);
 					model.curCircleSel = -1;
 				}
 				super.mouseReleased(e);
@@ -69,11 +72,13 @@ public class EditView extends JPanel implements Observer {
 			public void mouseDragged(MouseEvent e) {
 				if (curPadSel) {
 					model.updatePad(e.getX(), e.getY(), false);
+					model.ship.reset(model.ship.startPosition);
 					repaint();
 					return;
 				}
 				if (model.curCircleSel != -1) {
-					model.updatePeak(model.curCircleSel, e.getY(), false);				
+					model.updatePeak(model.curCircleSel, e.getY(), false);	
+					model.ship.reset(model.ship.startPosition);
 				}
 				super.mouseDragged(e);
 			}
@@ -91,6 +96,8 @@ public class EditView extends JPanel implements Observer {
 		// TODO Auto-generated method stub
 		super.paintComponent(g);
 		Graphics2D g2 = (Graphics2D) g;  
+		g2.setColor(Color.lightGray);
+		g2.fill(model.bg);
 		g2.setColor(Color.darkGray);
 		g2.fillPolygon(model.terrain);
 		g2.setColor(Color.gray);

@@ -3,11 +3,13 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
 
-public class A3Basic extends JPanel {
+// added a little flag when the ship lands
+public class A3Enhanced extends JPanel {
 
-    A3Basic() {
+    A3Enhanced() {
         // create the model
         GameModel model = new GameModel(60, 700, 200, 20);
+        model.isEnhanced = true;
 
         JPanel playView = new PlayView(model);
         JPanel editView = new EditView(model);
@@ -35,10 +37,10 @@ public class A3Basic extends JPanel {
 
     public static void main(String[] args) {
         // create the window
-        JFrame f = new JFrame("A3Basic"); // jframe is the app window
+        JFrame f = new JFrame("A3Enhanced"); // jframe is the app window
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         f.setSize(716, 600); // window size
-        f.setContentPane(new A3Basic()); // add main panel to jframe
+        f.setContentPane(new A3Enhanced()); // add main panel to jframe
         f.setVisible(true); // show the window
     }
 }

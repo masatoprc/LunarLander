@@ -13,6 +13,7 @@ public class GameModel extends Observable {
 
 	java.util.List<Point> peaksArr = new ArrayList<Point>();
 	Rectangle2D pad = new Rectangle2D.Double(330, 100, 40, 10);
+	Rectangle2D bg = new Rectangle2D.Double(0, 0, 700, 200);
 	ArrayList<Ellipse2D> circles = new ArrayList<>();
 	Polygon terrain = new Polygon();
 	int curCircleSel = -1;
@@ -22,7 +23,8 @@ public class GameModel extends Observable {
 	double oldPadYValue;
 	int oldPeakValue;
     Rectangle2D.Double worldBounds;
-    public Ship ship;   
+    public Ship ship;  
+    boolean isEnhanced = false;
     
     public GameModel(int fps, int width, int height, int peaks) {
 
@@ -34,6 +36,22 @@ public class GameModel extends Observable {
         ship.addObserver(new Observer() {
             @Override
             public void update(Observable o, Object arg) {
+            	Rectangle2D shipRect = ship.getShape();
+            	if (!ship.isCrashed) {
+            		if (terrain.intersects(shipRect) || !worldBounds.contains(shipRect)) {
+            			ship.timer.stop();
+            			ship.isCrashed = true;            			
+            		} else if (pad.intersects(shipRect) && ship.getSpeed() < ship.getSafeLandingSpeed()) {
+                        ship.timer.stop();
+                        ship.isLanded = true;
+            		} else if (pad.intersects(shipRect) && 
+            				(ship.getSpeed() >= ship.getSafeLandingSpeed()
+            				|| ship.getSpeed() >= 1)) {
+                        ship.timer.stop();
+                        ship.isCrashed = true;
+            		}
+            		
+            	}
                 setChangedAndNotify();
             }
         });
