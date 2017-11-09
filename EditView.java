@@ -10,7 +10,6 @@ import java.util.*;
 public class EditView extends JPanel implements Observer {
 
 	boolean curPadSel = false;
-	Point vec = new Point();
 	GameModel model;
 	
     public EditView(GameModel model) {
@@ -22,7 +21,9 @@ public class EditView extends JPanel implements Observer {
         this.addMouseListener(new MouseAdapter() {
         	public void mouseClicked(MouseEvent e) {
         		if (e.getClickCount() == 2) {
-        			model.updatePad(e.getX(), e.getY());
+        			model.oldPadXValue = model.pad.getX();
+					model.oldPadYValue = model.pad.getY();
+        			model.updatePad(e.getX(), e.getY(), true);
         			repaint();
         		}
         	}
@@ -31,12 +32,14 @@ public class EditView extends JPanel implements Observer {
 			public void mousePressed(MouseEvent e) {
 				if (model.pad.contains(e.getX(), e.getY())) {
 					curPadSel = true;
-					vec.setLocation(e.getX(), e.getY());
+					model.oldPadXValue = model.pad.getX();
+					model.oldPadYValue = model.pad.getY();
 					return;
 				}
 				for (int i = 0; i < 20; i++) {
 					if (model.circles.get(i).contains(e.getX(), e.getY())) {
 						model.curCircleSel = i;
+						model.oldPeakValue = (int) model.getPeaks().get(i).getY();
 						break;
 					}
 				}
@@ -47,15 +50,14 @@ public class EditView extends JPanel implements Observer {
 			@Override
 			public void mouseReleased(MouseEvent e) {
 				if (curPadSel) {
-					model.updatePad(e.getX(), e.getY());
+					model.updatePad(e.getX(), e.getY(), true);
 					repaint();
 					curPadSel = false;
 					return;
 				}
 				if (model.curCircleSel != -1) {
 					model.terrain.ypoints[model.curCircleSel] = e.getY();
-					model.updatePeak(model.curCircleSel, e.getY());
-					model.updateCircle(e.getY());				
+					model.updatePeak(model.curCircleSel, e.getY(), true);			
 					model.curCircleSel = -1;
 				}
 				super.mouseReleased(e);
@@ -66,13 +68,12 @@ public class EditView extends JPanel implements Observer {
 			@Override
 			public void mouseDragged(MouseEvent e) {
 				if (curPadSel) {
-					model.updatePad(e.getX(), e.getY());
+					model.updatePad(e.getX(), e.getY(), false);
 					repaint();
 					return;
 				}
 				if (model.curCircleSel != -1) {
-					model.updatePeak(model.curCircleSel, e.getY());
-					model.updateCircle(e.getY());				
+					model.updatePeak(model.curCircleSel, e.getY(), false);				
 				}
 				super.mouseDragged(e);
 			}
@@ -90,7 +91,6 @@ public class EditView extends JPanel implements Observer {
 		// TODO Auto-generated method stub
 		super.paintComponent(g);
 		Graphics2D g2 = (Graphics2D) g;  
-		//if (pad.contains(M.x, M.y)) {}
 		g2.setColor(Color.darkGray);
 		g2.fillPolygon(model.terrain);
 		g2.setColor(Color.gray);

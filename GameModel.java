@@ -16,11 +16,19 @@ public class GameModel extends Observable {
 	ArrayList<Ellipse2D> circles = new ArrayList<>();
 	Polygon terrain = new Polygon();
 	int curCircleSel = -1;
-	
+	// Undo manager
+	private UndoManager undoManager;
+	double oldPadXValue;
+	double oldPadYValue;
+	int oldPeakValue;
+    Rectangle2D.Double worldBounds;
+    public Ship ship;   
+    
     public GameModel(int fps, int width, int height, int peaks) {
 
         ship = new Ship(60, width/2, 50);
         worldBounds = new Rectangle2D.Double(0, 0, width, height);
+        undoManager = new UndoManager();
 
         // anonymous class to monitor ship updates
         ship.addObserver(new Observer() {
@@ -47,14 +55,6 @@ public class GameModel extends Observable {
         return worldBounds;
     }
 
-    Rectangle2D.Double worldBounds;
-
-
-    // Ship
-    // - - - - - - - - - - -
-
-    public Ship ship;
-
     // Observerable
     // - - - - - - - - - - -
 
@@ -68,15 +68,72 @@ public class GameModel extends Observable {
     	return peaksArr;
     }
     
-    public void updatePeak(int index, int y) {
-    	if (y < 0) {y = 0;}
-    	if (y > 200) {y = 200;}
-    	terrain.ypoints[curCircleSel] = y;
-    	peaksArr.get(index).y = y;
+    public void updatePeak(int index, int y, boolean undoAble) {
+    	int yVal;
+    	if (y < 0) {yVal = 0;}
+    	else if (y > 200) {yVal = 200;}
+    	else {yVal = y;}
+    	if (undoAble) {
+    		// create undoable edit
+    		UndoableEdit undoableEdit = new AbstractUndoableEdit() {
+
+    			// capture variables for closure
+    			final int oldYValue = oldPeakValue;
+    			final int newYValue = yVal;
+    			final int newIndex = index;
+
+    			// Method that is called when we must redo the undone action
+    			public void redo() throws CannotRedoException {
+    				super.redo();
+    				updatePeak(newIndex, newYValue, false);
+    				setChangedAndNotify();
+    			}
+
+    			public void undo() throws CannotUndoException {
+    				super.undo();
+    				updatePeak(newIndex, oldYValue, false);
+    				setChangedAndNotify();
+    			}
+    		};
+
+    		// Add this undoable edit to the undo manager
+    		undoManager.addEdit(undoableEdit);
+    	}
+    	terrain.ypoints[index] = yVal;
+    	peaksArr.get(index).y = yVal;
+    	circles.set(index, new Ellipse2D.Double(peaksArr.get(index).getX() - 15,
+				peaksArr.get(index).getY() - 15, 30, 30));
     	setChangedAndNotify();
     }
     
-    public void updatePad(int x, int y) {
+    public void updatePad(int x, int y, boolean undoAble) {
+    	if (undoAble) {
+    		// create undoable edit
+    		UndoableEdit undoableEdit = new AbstractUndoableEdit() {
+
+    			// capture variables for closure
+    			final double oldXValue = oldPadXValue;
+    			final int newXValue = x;
+    			final double oldYValue = oldPadYValue;
+    			final int newYValue = y;
+
+    			// Method that is called when we must redo the undone action
+    			public void redo() throws CannotRedoException {
+    				super.redo();
+    				updatePad(newXValue, newYValue, false);
+    				setChangedAndNotify();
+    			}
+
+    			public void undo() throws CannotUndoException {
+    				super.undo();
+    				pad.setRect(oldXValue, oldYValue, pad.getWidth(), pad.getHeight());
+    				setChangedAndNotify();
+    			}
+    		};
+
+    		// Add this undoable edit to the undo manager
+    		undoManager.addEdit(undoableEdit);
+    	}
     	double xPar = x - pad.getWidth()/2;
     	double yPar = y - pad.getHeight()/2;
     	if (xPar < 0) {xPar = 0;}
@@ -84,14 +141,30 @@ public class GameModel extends Observable {
     	if (yPar < 0) {yPar = 0;}
     	if (yPar > 190) {yPar = 190;}
     	pad.setRect(xPar, yPar, pad.getWidth(), pad.getHeight());
+    	setChangedAndNotify();
     }
     
-    public void updateCircle(int y) {
-    	if (y < 0) {y = 0;}
-    	if (y > 200) {y = 200;}
-    	circles.set(curCircleSel, new Ellipse2D.Double(peaksArr.get(curCircleSel).getX() - 15,
-				peaksArr.get(curCircleSel).getY() - 15, 30, 30));
-    }
+	// undo and redo methods
+	// - - - - - - - - - - - - - -
+
+	public void undo() {
+		if (canUndo())
+			undoManager.undo();
+	}
+
+	public void redo() {
+		if (canRedo())
+			undoManager.redo();
+	}
+
+	public boolean canUndo() {
+		return undoManager.canUndo();
+	}
+
+	public boolean canRedo() {
+		return undoManager.canRedo();
+	}
+
 }
 
 
