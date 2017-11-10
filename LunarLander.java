@@ -4,9 +4,9 @@ import javax.swing.event.ChangeListener;
 import java.awt.*;
 
 // added a little flag when the ship lands
-public class A3Enhanced extends JPanel {
+public class LunarLander extends JPanel {
 
-    A3Enhanced() {
+    LunarLander() {
         // create the model
         GameModel model = new GameModel(60, 700, 200, 20);
         model.isEnhanced = true;
@@ -37,10 +37,10 @@ public class A3Enhanced extends JPanel {
 
     public static void main(String[] args) {
         // create the window
-        JFrame f = new JFrame("A3Enhanced"); // jframe is the app window
+        JFrame f = new JFrame("Lunar Lander"); // jframe is the app window
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        f.setSize(716, 600); // window size
-        f.setContentPane(new A3Enhanced()); // add main panel to jframe
+        f.setSize(700, 600); // window size
+        f.setContentPane(new LunarLander()); // add main panel to jframe
         f.setVisible(true); // show the window
     }
 }
